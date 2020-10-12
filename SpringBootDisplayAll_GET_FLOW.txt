@@ -1,0 +1,139 @@
+
+	 ------------------------------------------
+		   CODING PART - ANGULAR
+	 *******************************************
+		PART#1 DISPLAY ALL PRODUCTS
+
+=> To open any file : ctrl+p (file name matching words> press un/pwd keys > enter)
+
+a. open file : product.service.ts(ProductService)
+
+=> Use HttpClient (C) that supports making request to backend application.
+=> While making Http Request(GET,POST..) we need to pass OutputType and URL,...etc
+=> Response data given by backend application is stored as Observable<T> memory
+    which can be shared with any component.
+
+
+--code: product.service.ts--
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { Product } from './product';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class ProductService {
+  baseUrl = 'http://localhost:8080/product';
+
+  // dependency injection
+  constructor(private http: HttpClient) {}
+
+  getAllProducts(): Observable<Product[]> {
+    return this.http.get<Product[]>(`${this.baseUrl}/all`);
+  }
+}
+-----------product.ts---
+export class Product {
+  id: number;
+  prodCode: string;
+  prodCost: number;
+  vendorName: String;
+  prodGst: number;
+}
+------------------------
+Note:
+--Spring F/w--
+B---<>A
+
+class A{}
+class B{
+   @Autowired
+   A  oa;
+}
+--Angualr---
+B--<>A
+
+class A{}
+class B{
+  //dependency injection
+  constructor(private oa:A){ }
+}
+
+---------------------------------------------
+b. Component TypeScript Code: product-list.component.ts (ProductListComponent)
+
+-> When we enter URL (/all) Related to This Component, ngOnInit() is called once.
+-> Use this ngOnInit() method and make service call to fetch data from backend.
+-> subscribe data to one variable (product[]) on success, on error print message
+    on console.
+
+-> Finally It will move to its connected UI Template (HTML File)
+
+---code: product-list.component.html-
+import { Component, OnInit } from '@angular/core';
+import { Product } from '../product';
+import { ProductService } from '../product.service';
+
+@Component({
+  selector: 'app-product-list',
+  templateUrl: './product-list.component.html',
+  styleUrls: ['./product-list.component.css'],
+})
+export class ProductListComponent implements OnInit {
+  //vaiable
+  products: Product[];
+
+  //inject service
+  constructor(private service: ProductService) {}
+
+  ngOnInit(): void {
+    this.getAllProducts();
+  }
+
+  getAllProducts() {
+    this.service.getAllProducts().subscribe(
+      (data) => {
+        //on success
+        this.products = data;
+      },
+      (error) => {
+        //on fail
+        console.log(error);
+      }
+    );
+  }
+}
+------------code: product-list.component.html--
+<h3>Product Data </h3>
+<table class="table">
+    <tr>
+        <th>ID</th>
+        <th>CODE</th>
+        <th>COST</th>
+        <th>VENDOR</th>
+        <th>GST</th>
+    </tr>
+    <tr *ngFor='let p of products'>
+        <td>{{p.id}}</td>
+        <td>{{p.prodCode}}</td>
+        <td>{{p.prodCost}}</td>
+        <td>{{p.vendorName}}</td>
+        <td>{{p.prodGst}}</td>
+    </tr>
+</table>
+----------------------------------
+
+** Add below line at Rest controller : 
+@CrossOrigin(origins = "http://localhost:4200")
+
+** Start Spring Boot Application
+> Open starter class and press ctrl+F11
+
+** Start Angular application
+> ctrl + ` (open terminal)
+> cd product-ui-app
+> ng serve --open
+
+** Goto browser and enter URL:
+http://localhost:4200/all

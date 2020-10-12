@@ -1,0 +1,174 @@
+
+	    Spring Boot ReST + Angular Integration
+
+--Step#1 Install Softwares Required --------
+a. Download and install Node JS
+ https://nodejs.org/en/download/
+> Click on OS (ex: Windows)
+> It will be downloaded
+> Double click on S/w > Next > Next > Finish
+
+b. check installtion of Node
+cmd> node -v
+cmd> npm -v
+
+c. Install Angular Framework
+cmd> npm install -g @angular/cli
+
+d. Check Angular Version
+cmd> ng version
+
+e. Download and Install Visual Studio Code Editor
+ https://code.visualstudio.com/download
+
+> Double click on Software > Next > Next > Finish
+
+f. Open Visual Studio Code Editor
+ ctrl+ ` (backtic) to open terminal
+
+
+Optional Extensions:
+> Material Icon Theme
+> Prettier Code formatter
+> Bracket Pair Colorizer
+
+g. Create a folder in system
+ex:  d:/AngularApps
+
+h. Open same folder in VS code Editor
+> File > Open Folder > select above folder > click on 'select folder'
+
+******************************************************************************
+
+--Step#2: Create a Project and Generate code files-------------------------------
+a. Create new Project
+> Goto View Menu > Choose Terminal (ctrl+`)
+> ng new product-ui-app    (creates new project)
+Would you like to add Angular routing? Yes (type y and press enter)
+Which stylesheet format would you like to use? CSS (just press enter)
+
+b. Goto project folder
+> cd product-ui-app
+
+c. Generate code files
+    i. Model class  : To create JSON objects and store data
+   ii. Service      : HTTP calls (GET,PUT,POST..etc)
+  iii. Components   : UI Design class(.ts-Typescript) and HTML (.html-Template file)
+
+  ng  g  class product
+  ng  g  s product  --skipTests=true
+  ng  g c  product-list  --skipTests=true
+  ng  g c  product-create --skipTests=true
+  ng  g c  product-edit --skipTests=true
+
+*)Note: To ignore spec file (Unit test file in angular) use --skipTests=true
+
+d. Run Application
+cmd> ng serve --open
+URL: http://localhost:4200/
+
+e. To Stop application
+cmd> press ctrl+C and enter y
+******************************************************************************
+
+--Step#3 onetime setup in project--------------------------------
+a. Activate Http and Forms in Angular
+
+> open app.module.ts
+> add below imports
+import { HttpClientModule } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
+
+> Add below options inside imports array  (imports: [..] )
+
+ imports:[
+    ...
+    HttpClientModule,
+    FormsModule
+ ]
+
+
+b. Activate Routing URLs using file: app-routing.module.ts
+
+> Replace empty routes array 
+const routes: Routes = []
+
+> with below code
+
+const routes: Routes = [
+  {path: 'all', component:ProductListComponent},
+  {path: 'add', component:ProductCreateComponent},
+  {path: 'edit/:id', component:ProductEditComponent},
+  {path: '', redirectTo: 'all', pathMatch: 'full'},
+];
+
+> add below imports even
+
+import { ProductCreateComponent } from './product-create/product-create.component';
+import { ProductEditComponent } from './product-edit/product-edit.component';
+import { ProductListComponent } from './product-list/product-list.component';
+
+
+c. Remove content and add below line only : app.component.html
+  <router-outlet></router-outlet>
+
+d. Start application and check setup
+cmd> ng serve --open
+http://localhost:4200/add
+http://localhost:4200/all
+http://localhost:4200/edit/10
+
+******************************************************************************
+
+--Step#4 Menubar Design--------------------------------
+1. index.html
+
+Add below link under head section
+<head>
+ <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+
+</head>
+
+Under body:
+  <body>
+    <div class="container">
+      <app-root></app-root>
+    </div>
+  </body>
+
+2. app.component.ts
+
+<nav class="navbar navbar-expand-lg navbar-light bg-primary">
+  <a class="navbar-brand text-white" href="#">Navbar</a>
+  <button
+    class="navbar-toggler"
+    type="button"
+    data-toggle="collapse"
+    data-target="#navbarSupportedContent"
+    aria-controls="navbarSupportedContent"
+    aria-expanded="false"
+    aria-label="Toggle navigation"
+  >
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item active">
+        <a class="nav-link text-white" href="#" routerLink="add">
+          Add 
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white" href="#" routerLink="all">
+          View All </a>
+      </li>
+    </ul>
+  </div>
+</nav>
+<router-outlet></router-outlet>
+
+=========================================================================
