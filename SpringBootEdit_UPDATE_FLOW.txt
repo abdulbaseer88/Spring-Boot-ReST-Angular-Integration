@@ -1,0 +1,139 @@
+
+		Operation#4 Edit Operation
+
+** Router: This is used to navigate(move) between components.
+=> One Component HTML file can never contact with another component TS file dirctly.
+Ex: product-list.component.html can never contact with product-edit.component.ts
+
+Level-I Show Data in Edit Component on click Edit Button
+
+--File: product-list.component.html------
+> add EDIT button and call function in TS file
+
+<button class="btn btn-info" (click)='editProduct(p.id)'>EDIT</button>
+
+---File: product-list.component.ts-----
+
+> Inject Router into Component class using constructor 
+  constructor(private service: ProductService, private router:Router) {}
+
+> define editProduct(id) function, navigate to edit component
+  
+  editProduct(id:number) {
+    //console.log(id);
+    this.router.navigate(['edit',id]);
+  }
+
+---File : product.service.ts -----------
+> Define a function that uses HttpClient and makes Request to backend app
+  to get one Product JSON object using id
+
+getOneProduct(id: number): Observable<Product> {
+    return this.http.get<Product>(`${this.baseUrl}/find/${id}`);
+}
+
+---File: product-edit.component.ts----------
+> Define variables for id and form object(product)
+> Inject service and activatedRoute into Component TS
+> read id from URL/Path using snapshot.param
+> call service and subscribe data into product object
+> Move to UI(HTML) File
+
+
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { Product } from '../product';
+import { ProductService } from '../product.service';
+
+@Component({
+  selector: 'app-product-edit',
+  templateUrl: './product-edit.component.html',
+  styleUrls: ['./product-edit.component.css']
+})
+export class ProductEditComponent implements OnInit {
+  // variables
+  id : number;
+  product : Product;
+
+  //inject service and ActivatedRoute
+  constructor(private service:ProductService,private activatedRoute: ActivatedRoute) { }
+
+  ngOnInit(): void {
+    //read id from router path /edit/10
+    this.id = this.activatedRoute.snapshot.params['id'];
+    // fetch data using service
+    this.service.getOneProduct(this.id)
+    .subscribe(data=>{
+      this.product = data;
+    },error=>{
+      console.log(error);
+    })
+  }
+
+}
+
+--File: product-edit.component.html------
+<h3>PRODUCT EDIT </h3>
+<form (ngSubmit)="updateProduct()">
+    
+    <!-- row#1 -->
+    <div class="row">
+        <div class="col-2">
+            <label>PRODUCT CODE</label>
+        </div>
+        <div class="col-4">
+            <input type="text" name="prodCode" id="prodCode" [(ngModel)]="product.prodCode" class="form-control"/>
+        </div>
+    </div>
+
+    <!-- row#2 -->
+    <div class="row">
+        <div class="col-2">
+            <label>PRODUCT COST</label>
+        </div>
+        <div class="col-4">
+            <input type="text" name="prodCost" id="prodCost" [(ngModel)]="product.prodCost" class="form-control"/>
+        </div>
+    </div>
+
+    <!-- row#3 -->
+    <div class="row">
+        <div class="col-2">
+            <label>VENDOR NAME</label>
+        </div>
+        <div class="col-4">
+            <input type="text" name="vendorName" id="vendorName" [(ngModel)]="product.vendorName" class="form-control" readonly/>
+        </div>
+    </div>
+
+    <input type="submit" value="Update Product" class="btn btn-success"/>
+</form>
+______________________________________________________________________________
+   Level-II Update data into database on click Update Button
+
+--- File: product.service.ts-----------
+> Define a function inside service that reads id, product from Component
+  and calls HTTP PUT operation 
+
+updateProduct(id: number, product: Product):Observable<any> {
+    return this.http.put(`${this.baseUrl}/modify/${id}`,product, {responseType: 'text'});
+}
+
+---File : product-edit.component.ts---
+
+//Inject Router using constrcutor
+constructor(private service:ProductService,private activatedRoute: ActivatedRoute, private router:Router) { }
+
+// Define a function which gets called on click update button
+
+// on click submit form
+  updateProduct() {
+    this.service.updateProduct(this.id, this.product).subscribe(
+      (data) => {
+        this.router.navigate(['all']); //navigate to all on success
+      },
+      (error) => {
+        console.log(error);
+      }
+    );
+  }

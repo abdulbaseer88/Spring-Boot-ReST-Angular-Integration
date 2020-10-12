@@ -1,0 +1,50 @@
+
+		Operation#2 Delete Product by Id
+
+#1. --Service-- : product.service.ts
+> Define one function inside serivce class, that reads id from Component
+  while making delete() http call, send data using PathVariable concept. 
+  Returns Text Response back to Component, like : Product 101 Deleted.
+
+deleteProduct(id: number): Observable<any> {
+ return this.http.delete(`${this.baseUrl}/remove/${id}`,{ responseType : 'text'});
+}
+
+#2. --HTML---: product-list.component.html
+>> Define one <button> at UI
+>> provide (click) event and call TS function: deleteProduct(id)
+>> Display message 
+
+        <td>
+            <button class="btn btn-danger" (click)='deleteProduct(p.id)'>DELETE</button>
+        </td>
+
+	(after table)
+	<div class='alert alert-success' *ngIf='message'>{{message}}</div>
+
+#3. --TS---: product-list.component.ts
+
+>> Define : deleteProduct(id) function
+>> Make Service call for delete and subscribe
+>> on success, read message and reload new data
+>> on error print details to console.
+
+--add below function--
+deleteProduct(id: number) {
+    if (confirm('Do you want to delete :' + id)) {
+      this.service.deleteProduct(id).subscribe(
+        (data) => {
+          this.message = data;
+          //re load new data
+          this.getAllProducts();
+        },
+        (error) => {
+          console.log(error);
+        }
+      );
+      //console.log('Deleted' + id);
+    } else {
+      this.message = 'Delete Operation is Cancelled';
+      //console.log('Deleted cancelled :' + id);
+    }
+}

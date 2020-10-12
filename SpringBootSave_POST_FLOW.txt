@@ -1,0 +1,115 @@
+
+	  Operation#3 Product Register 
+
+ngModel = Link one input with one variable/field/key in JSON object
+
+Ex: product: Product  (one object created)
+<input type="text" [(ngModel)]="product.prodCode" />
+
+=> If we use ngModel then only FORM data can be converted into Object.
+   Object data can be converted into FORM (Bi-Directional)
+
+ngSubmit = This is used to specify function name that should be called on submit.
+
+======code files in order===================
+1. Product Service : product.service.ts
+
+=> Define one function, that makes HTTP Post call. It will send JSON(product)
+   and expected OutputType is text.
+
+createProduct(product: Product): Observable<any> {
+    return this.http.post(`${this.baseUrl}/save`, product, {
+      responseType: 'text',
+    });
+}
+
+2. Product HTML
+=> Define HTML Form with inputs
+=> Link Form input with JSON object key using ngModel
+
+
+--product-create.component.html--
+<h3>PRODUCT CREATE </h3>
+<form (ngSubmit)="createProduct()">
+    <!-- row#1 -->
+    <div class="row">
+        <div class="col-2">
+            <label>PRODUCT CODE</label>
+        </div>
+        <div class="col-4">
+            <input type="text" name="prodCode" id="prodCode" [(ngModel)]="product.prodCode" class="form-control"/>
+        </div>
+    </div>
+
+    <!-- row#2 -->
+    <div class="row">
+        <div class="col-2">
+            <label>PRODUCT COST</label>
+        </div>
+        <div class="col-4">
+            <input type="text" name="prodCost" id="prodCost" [(ngModel)]="product.prodCost" class="form-control"/>
+        </div>
+    </div>
+
+    <!-- row#3 -->
+    <div class="row">
+        <div class="col-2">
+            <label>VENDOR NAME</label>
+        </div>
+        <div class="col-4">
+            <input type="text" name="vendorName" id="vendorName" [(ngModel)]="product.vendorName" class="form-control"/>
+        </div>
+    </div>
+
+    <input type="submit" value="Add Product" class="btn btn-success"/>
+</form>
+<div class='alert alert-success' *ngIf='message'>{{message}}</div>
+---------------------------------------------------------------------
+
+
+3. Product Component TS
+=> Define Form Object (JSON) product
+=> Initialize JSON with defaults
+
+=> Inject service into Component TS
+=> define function createProduct() and call service method
+=> on success read data and clear form object.
+
+
+---product-create.component.ts---------
+import { Component, OnInit } from '@angular/core';
+import { Product } from '../product';
+import { ProductService } from '../product.service';
+
+@Component({
+  selector: 'app-product-create',
+  templateUrl: './product-create.component.html',
+  styleUrls: ['./product-create.component.css'],
+})
+export class ProductCreateComponent implements OnInit {
+  //declare form object
+  product: Product;
+  message: any;
+
+  //inject service
+  constructor(private service: ProductService) {}
+
+  ngOnInit(): void {
+    //initialize JSON object with defaults
+    this.product = new Product();
+  }
+
+  // on click submit button
+  createProduct() {
+    this.service.createProduct(this.product).subscribe(
+      (data) => {
+        this.message = data;
+        this.product = new Product();
+      },
+      (error) => {
+        console.log(error);
+      }
+    );
+  }
+}
+-----------------------------------------------
